@@ -62,7 +62,7 @@ function getAllJSONKeys(json, structure, allKeys) {
                     let grandChild = json[key][innerKey];
                     if (grandChild !== null && grandChild !== undefined) {
                         if(typeof grandChild === "object") {
-                            getAllJSONKeysRecursively(grandChild, childPath, allKeys);
+                            getAllJSONKeys(grandChild, childPath, allKeys);
                         }
                     }
                 });
