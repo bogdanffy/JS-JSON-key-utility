@@ -20,7 +20,7 @@
  *
  * @return {Array} Returns an array with all the key-s found in the given JSON object.
  */
-function getAllJSONKeysRecursively(json, structure, allKeys) {
+function getAllJSONKeys(json, structure, allKeys) {
     let keys = Object.keys(json);
   
     if(allKeys !== null && allKeys !== undefined) {
