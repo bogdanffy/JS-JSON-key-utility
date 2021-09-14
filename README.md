@@ -1,7 +1,7 @@
 <h1># JS-JSON-key-utility</h1>
 <p>JavaScript utility for processing complex JSON structures.</p>
 
-<h2>Main Functions:</h2>
+<h2>Functions:</h2>
 
 <h3>getAllJSONKeys(json):</h3>
 Get all the keys (recursively) from a complex JSON object structure.
