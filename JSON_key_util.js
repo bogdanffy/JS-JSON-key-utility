@@ -23,7 +23,7 @@
 function getAllJSONKeys(json, structure, allKeys) {
     let keys = Object.keys(json);
   
-    if(allKeys !== null && allKeys !== undefined) {
+    if(allKeys) {
         console.log("Step in inner JSON object:");
         console.log(json);
     } else {
@@ -32,7 +32,7 @@ function getAllJSONKeys(json, structure, allKeys) {
         allKeys = [];
     }
 
-    if(keys !== null && keys !== undefined) {
+    if(keys) {
         let originalStructure = structure;
         keys.forEach(key => {
             structure = originalStructure;
@@ -45,7 +45,8 @@ function getAllJSONKeys(json, structure, allKeys) {
 
             allKeys.push(structure);
             
-            if(typeof json[key] === "object") {
+            // Check if json[key] is not null -> null is an object in JS
+            if(json[key] && typeof json[key] === "object") {
                 let keysOfChild = Object.keys(json[key]);
 
                 keysOfChild.forEach(innerKey => {
@@ -60,7 +61,7 @@ function getAllJSONKeys(json, structure, allKeys) {
                     allKeys.push(childPath);
 
                     let grandChild = json[key][innerKey];
-                    if (grandChild !== null && grandChild !== undefined) {
+                    if (grandChild) {
                         if(typeof grandChild === "object") {
                             getAllJSONKeys(grandChild, childPath, allKeys);
                         }
