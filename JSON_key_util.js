@@ -25,7 +25,7 @@ const getAllJSONKeys = (json, structure = null, allKeys = []) => {
 
     if(keys) {
         const originalStructure = structure;
-        keys.forEach(key => {
+        for (const key of keys) {
             structure = originalStructure;
             structure ? structure += `.${key}` : structure = key;
             allKeys.push(structure);
@@ -46,7 +46,7 @@ const getAllJSONKeys = (json, structure = null, allKeys = []) => {
                     }
                 });
             }
-        });
+        }
         return allKeys;
     } else {
         console.warn("JSON is null OR invalid...");
@@ -81,9 +81,9 @@ const getJSONValue = (path, json) => {
     if(path.startsWith("$.")) path.replace("$.", "");
     const splittedPath = path.split(".");
 
-    splittedPath.forEach(path => {
+    for(const path of splittedPath) {
         json = json[path];
-    });
+    };
 
     return json;
 }
@@ -104,13 +104,13 @@ const getJSONValue = (path, json) => {
  */
  const getAllJSONValues = (pathArray, json) => {
     let resultArr = [];
-    pathArray.forEach(path => {
+    for (const path of pathArray) {
         try {
             resultArr.push(getJSONValue(path, json));
         } catch (error) {
             console.warn(`Error getting JSON value from path: ${path}`);
         } 
-    });
+    };
     return resultArr;
 }
 
@@ -128,9 +128,9 @@ const printAllJSONValueToConsole = (pathArray, json) => {
     console.log("======================================================================");
     console.log("========= JSON VALUES BY JSON PATH ARRAY:");
     console.log("======================================================================");
-    pathArray.forEach(path => {
+    for (const path of pathArray) {
         console.log("Path: $." + path + ", Value => " + getJSONValue(path, json));
-    });
+    };
     console.log("======================================================================");
     console.log("========= PRINT JSON VALUES END");
     console.log("======================================================================");
