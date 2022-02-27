@@ -22,7 +22,6 @@
  */
 const getAllJSONKeys = (json, structure = null, allKeys = []) => {
     const keys = Object.keys(json);
-
     if(keys) {
         const originalStructure = structure;
         for (const key of keys) {
@@ -32,11 +31,11 @@ const getAllJSONKeys = (json, structure = null, allKeys = []) => {
             
             // Check if json[key] is not null -> null is an object in JS
             if(json[key] && typeof json[key] === "object") {
-                let keysOfChild = Object.keys(json[key]);
+                const keysOfChild = Object.keys(json[key]);
                 let childPath;
                 let grandChild;
 
-                keysOfChild.forEach(innerKey => {
+                for(const innerKey of keysOfChild) {
                     childPath = `${structure}.${innerKey}`;
                     allKeys.push(childPath);
 
@@ -44,7 +43,7 @@ const getAllJSONKeys = (json, structure = null, allKeys = []) => {
                     if (grandChild && typeof grandChild === "object") {
                         getAllJSONKeys(grandChild, childPath, allKeys);
                     }
-                });
+                };
             }
         }
         return allKeys;
