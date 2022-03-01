@@ -15,35 +15,41 @@
  * @access     public
  *
  * @param {Object}                  json        The JSON object that needs to be processed.
- * @param {string | undefined}      structure   This parameter should be left undefined or null since it is used for the recursiveness of the funciton.
- * @param {Array | undefined}       allKeys     This parameter should be left undefined or null since it is used for the recursiveness of the funciton.
+ * @param {boolean}                 rootNeeded  Decides that the JSON root prefix ('$.') needed or not. Turned off by default.
+ * @param {string | null}           structure   This parameter should be left undefined or null since it is used for the recursiveness of the funciton.
+ * @param {Array}                   allKeys     This parameter should be left undefined or null since it is used for the recursiveness of the funciton.
  *
  * @return {Array} Returns an array with all the key-s found in the given JSON object.
  */
-const getAllJSONKeys = (json, structure = null, allKeys = []) => {
+const getAllJSONKeys = (json, rootNeeded = false, structure = null, allKeys = []) => {
     const keys = Object.keys(json);
-    if(keys) {
+    const prefix = rootNeeded ? "$" : "";
+
+    if (keys) {
         const originalStructure = structure;
         for (const key of keys) {
+            const keyValue = json[key];
             structure = originalStructure;
-            structure ? structure += `.${key}` : structure = key;
+            if(Array.isArray(json)) {
+                structure ? structure += `[${key}]` : structure = `${prefix}[${key}]`;
+            } else {
+                structure ? structure += `.${key}` : structure = `${prefix}.${key}`;
+            }
             allKeys.push(structure);
-            
-            // Check if json[key] is not null -> null is an object in JS
-            if(json[key] && typeof json[key] === "object") {
-                const keysOfChild = Object.keys(json[key]);
+            // Check if json[key] is not null and also an object -> null is an object in JS
+            if (keyValue && typeof keyValue === "object") {
+                const keysOfChild = Object.keys(keyValue);
                 let childPath;
-                let grandChild;
 
-                for(const innerKey of keysOfChild) {
-                    childPath = `${structure}.${innerKey}`;
+                for (const innerKey of keysOfChild) {
+                    Array.isArray(keyValue) ? childPath = `${structure}[${innerKey}]` : childPath = `${structure}.${innerKey}`;
                     allKeys.push(childPath);
-
-                    grandChild = json[key][innerKey];
+                    
+                    const grandChild = keyValue[innerKey];
                     if (grandChild && typeof grandChild === "object") {
-                        getAllJSONKeys(grandChild, childPath, allKeys);
+                        getAllJSONKeys(grandChild, rootNeeded, childPath, allKeys);
                     }
-                };
+                }
             }
         }
         return allKeys;
@@ -57,7 +63,7 @@ const getAllJSONKeys = (json, structure = null, allKeys = []) => {
 /**
  * Returns the value by the given path from a JSON object
  *
- * Example input path: "someObject.keyInsideObject2"
+ * Example input path: "$.someObject.keyInsideObject2" OR "someObject.keyInsideObject2"
  * Example input JSON: 
  * { 
  *      "someObject": { 
@@ -77,12 +83,17 @@ const getAllJSONKeys = (json, structure = null, allKeys = []) => {
  * @return {any} Returns the value by the given path from the given JSON object.
  */
 const getJSONValue = (path, json) => {
-    if(path.startsWith("$.")) path.replace("$.", "");
-    const splittedPath = path.split(".");
-
-    for(const path of splittedPath) {
-        json = json[path];
-    };
+    try {
+        path = path.replace(/[$\]"'\\]/g, "").trim();
+        if (path.startsWith(".")) path = path.substring(1);
+        const splittedPath = path.split(/[\s.\[]+/);
+        
+        for (const key of splittedPath) {
+            json = json[key];
+        }
+    } catch (err) {
+        throw(`Error getting JSON value from path: ${path}. Error: ${err}`);
+    }
 
     return json;
 }
@@ -91,9 +102,8 @@ const getJSONValue = (path, json) => {
 /**
  * Gets all JSON values by a path array (getAllJSONKeys function result).
  * 
- * !!!! COMPATIBLE WITH JSON PATH ROOT SIGN AS WELL: '$.'
- * 
- * Example input pathArray value: ["sourceObject.key", "$.sourceObject.subObject.key"]
+ * JSON path compatible:
+ * Example input pathArray value: ["sourceObject.key", "$.sourceObject.subObject.key", "$.sourceObject.subObject.key[2]",]
  *
  * @access     public
  *
@@ -107,9 +117,9 @@ const getJSONValue = (path, json) => {
         try {
             resultArr.push(getJSONValue(path, json));
         } catch (error) {
-            console.warn(`Error getting JSON value from path: ${path}`);
+            console.warn(error);
         } 
-    };
+    }
     return resultArr;
 }
 
@@ -129,7 +139,7 @@ const printAllJSONValueToConsole = (pathArray, json) => {
     console.log("======================================================================");
     for (const path of pathArray) {
         console.log("Path: $." + path + ", Value => " + getJSONValue(path, json));
-    };
+    }
     console.log("======================================================================");
     console.log("========= PRINT JSON VALUES END");
     console.log("======================================================================");
